@@ -1,4 +1,5 @@
 import time
+
 import smbus
 
 i2c_ch = 1
@@ -16,6 +17,7 @@ def twos_comp(val, bits):
         val = val - (1 << bits)
     return val
 
+
 # Read temperature registers and calculate Celsius
 def read_temp():
 
@@ -31,12 +33,13 @@ def read_temp():
 
     return temp_c
 
+
 # Initialize I2C (SMBus)
 bus = smbus.SMBus(i2c_ch)
 
 # Read the CONFIG register (2 bytes)
 val = bus.read_i2c_block_data(i2c_address, reg_config, 2)
-#print("Old CONFIG:", val)
+# print("Old CONFIG:", val)
 
 # Set to 4 Hz sampling (CR1, CR0 = 0b10)
 val[1] = val[1] & 0b00111111
