@@ -40,8 +40,8 @@ ADS7828_CONFIG_PD_REFON_ADON = 0x0C
 
 # ADS 7828 I2C CONTROL CLASS
 class Ads7828:
-    def __init__(self, address=DEVICE_ADDRESS, bus_id=I2C_CHANNEL, debug=False):
-        self.i2c = smbus.SMBus(bus_id)
+    def __init__(self, bus_id=I2C_CHANNEL, address=DEVICE_ADDRESS, debug=False):
+        self.i2c = bus_id
         self.address = address
         self.debug = debug
 
@@ -86,14 +86,14 @@ class Ads7828:
 class Voltage_cal(Ads7828):
     def __init__(
         self,
-        address=DEVICE_ADDRESS,
         bus_id=I2C_CHANNEL,
+        address=DEVICE_ADDRESS,
         debug=False,
         vref=ADC_REF_VOLT,
         default_ratio=DEFAULT_RATIO,
         offset=0,
     ):
-        Ads7828.__init__(self, address, bus_id, debug)
+        Ads7828.__init__(self, bus_id, address, debug)
         self.adc_resol = ADC_RESOLUTION
         self.vref = vref
         self.ratio = [self.adc_resol / (default_ratio * self.vref)] * 8
@@ -144,11 +144,21 @@ class Voltage_cal(Ads7828):
             "ch0=%2.2fA, ch1=%2.2fA, ch2=%2.2fA, ch3=%2.2fA, ch4=%2.2fA, ch5=%2.2fA, In ch6=%2.2fA, ch7=%2.2fA"
             % (data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7])
         )
-
+    
+    def rms_channel_0_current(self):
+        c_sum = 0
+        for x in range(100):
+            v = self.read_voltage(0)
+            c_sum += v
+            time.sleep(0.01)
+        return (c_sum/100.0 - 2.5) / 0.185
 
 if __name__ == "__main__":
     #    adc = Ads7828()
-    adc_measu = Voltage_cal()
+    bus = smbus.SMBus(1)
+    adc_measu = Voltage_cal(bus,0x48)
     while True:
         #        adc.all_ch_raw_adc_display()
-        adc_measu.all_ch_value_display()
+        #adc_measu.all_ch_value_display()
+        print(adc_measu.rms_channel_0_current())
+        

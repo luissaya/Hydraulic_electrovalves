@@ -1,11 +1,8 @@
 import math
 import time
-
 import smbus
 
-
 class PCA9685:
-
     # Registers/etc.
     __MODE1 = 0x00
     __MODE2 = 0x01
@@ -25,8 +22,8 @@ class PCA9685:
     __LED0_OFF_L = 0x08
     __LED0_OFF_H = 0x09
 
-    def __init__(self, address=0x40, debug=False):
-        self.bus = smbus.SMBus(1)
+    def __init__(self, bus, address=0x40, debug=False):
+        self.bus = bus
         self.address = address
         self.debug = debug
         if self.debug:
@@ -81,29 +78,21 @@ class PCA9685:
         if self.debug:
             print("channel: %d  LED_ON: %d LED_OFF: %d" % (channel, on, off))
 
-    # def setServoPulse(self, channel, pulse):
-    # "Sets the Servo Pulse,The PWM frequency must be 50HZ"
-    # pulse = pulse*4096/20000        #PWM frequency is 50HZ,the period is 20000us
-    # periodo 1000us
-    # self.setPWM(channel, 0, int(pulse))
     def setValvePWM(self, channel, percentage):
-        # "Sets the Servo Pulse,The PWM frequency must be 50HZ"
-        # pulse = pulse*4096/20000        #PWM frequency is 50HZ,the period is 20000us
-        # periodo 1000us
         pulse = int(percentage * 4095 / 100)
         self.setPWM(channel, 0, pulse)
 
-
 if __name__ == "__main__":
 
-    pwm = PCA9685(0x40, debug=False)
-    pwm.setPWMFreq(1000)
-    while True:
-        # setServoPulse(2,2500)
-        for i in range(0, 100, 10):
-            pwm.setValvePWM(0, i)
-            time.sleep(0.5)
+    bus = smbus.SMBus(1)
+    pwm = PCA9685(bus, 0x40, debug=False)
+    pwm.setPWMFreq(100)
+    pwm.setValvePWM(0,10)
+    #while True:
+    #    for i in range(0, 100, 10):
+    #        pwm.setValvePWM(0, i)
+    #        time.sleep(0.5)
 
-        for i in range(100, 0, -10):
-            pwm.setValvePWM(0, i)
-            time.sleep(0.5)
+    #    for i in range(100, 0, -10):
+    #        pwm.setValvePWM(0, i)
+    #        time.sleep(0.5)
