@@ -23,8 +23,8 @@ smbus library: https://github.com/adafruit/Adafruit_Python_PureIO/blob/main/Adaf
     8-Channel DC Current Monitor with I2C Interface
     [Device overview](https://store.ncd.io/product/8-channel-dc-current-monitor-with-i2c-interface/)
     Datasheets:
-    + ![ADS7828](https://media.ncd.io/sites/2/20170721134916/ADS7828-2.pdf?_ga=2.226438362.1942944568.1675366777-1088693194.1675366777)
-    + ![ACS712](https://www.sparkfun.com/datasheets/BreakoutBoards/0712.pdf)
+    [ADS7828](https://media.ncd.io/sites/2/20170721134916/ADS7828-2.pdf?_ga=2.226438362.1942944568.1675366777-1088693194.1675366777)
+    [ACS712](https://www.sparkfun.com/datasheets/BreakoutBoards/0712.pdf)
     
 ## XDB103-8
     XDB103-8 Diffused Silicon I2C Output Pressure Sensors – XIDIBEI
