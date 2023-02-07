@@ -33,7 +33,6 @@ class PCA9685:
     def write(self, reg, value):
         "Writes an 8-bit value to the specified register/address"
         self.bus.write_byte_data(self.address, reg, value)
-        print("the rregister is {}, and the value {}".format(reg, value))
         if self.debug:
             print("I2C: Write 0x%02X to register 0x%02X" % (value, reg))
 
@@ -70,7 +69,8 @@ class PCA9685:
 
     def setPWM(self, channel, on, off):
         "Sets a single PWM channel"
-        print("setting PWM in channel {}".format(channel))
+        if self.debug:
+            print("setting PWM in channel {}".format(channel))
         self.write(self.__LED0_ON_L + 4 * channel, on & 0xFF)
         self.write(self.__LED0_ON_H + 4 * channel, on >> 8)
         self.write(self.__LED0_OFF_L + 4 * channel, off & 0xFF)
