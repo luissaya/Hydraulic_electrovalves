@@ -78,7 +78,6 @@ class ADS7828:
             config |= ADS7828_CONFIG_CS_CH7
 
         # adc convertion time waiting
-        time.sleep(0.01)  
         data = [0, 0]
         data = self.i2c.read_i2c_block_data(self.address, config, 2)
         time.sleep(0.01)
