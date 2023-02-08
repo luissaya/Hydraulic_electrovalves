@@ -1,26 +1,14 @@
 import time
-
 import smbus
 
-DEVICE_ADDRESS = 0x48  # 7 bit address (will be left shifted to add the read write bit)
-I2C_CHANNEL = 1  # raspberry i2c channel
+DEVICE_ADDRESS = 0x48
+I2C_CHANNEL = 1
 
 PULL_UP_RESIST = 41.2
 PULL_DOWN_RESIST = 10.0
 ADC_REF_VOLT = 5.0
 DEFAULT_RATIO = 1.0
 ADC_RESOLUTION = 4095.0
-
-# TC1047 temperature sensor
-TC1047_ZERO_DEGC = 0.5
-TC1047_DEGC_FOR_VOLT = 0.01
-# LM61B temperatur sensor
-LM61B_ZERO_DEGC = 0.6
-LM61B_DEGC_FOR_VOLT = 0.01
-
-# temperature sensor set
-ZERO_DEG = TC1047_ZERO_DEGC
-DEGC_FOR_VOLT = TC1047_DEGC_FOR_VOLT
 
 # ADC7828 CONTROL REGISTER
 ADS7828_CONFIG_SD_DIFFERENTIAL = 0x00
@@ -39,11 +27,34 @@ ADS7828_CONFIG_PD_REFON_ADOFF = 0x08
 ADS7828_CONFIG_PD_REFON_ADON = 0x0C
 
 # ADS 7828 I2C CONTROL CLASS
-class Ads7828:
-    def __init__(self, bus_id=I2C_CHANNEL, address=DEVICE_ADDRESS, debug=False):
+class ADS7828:
+    def __init__(self, bus_id=I2C_CHANNEL, address=DEVICE_ADDRESS, 
+        vref=ADC_REF_VOLT, default_ratio=DEFAULT_RATIO,offset=0,
+        debug=False):
         self.i2c = bus_id
         self.address = address
         self.debug = debug
+
+        self.adc_resol = ADC_RESOLUTION
+        self.vref = vref
+        self.ratio = [self.adc_resol / (default_ratio * self.vref)] * 8
+        self.offset = [offset] * 8
+        self.adc_ratio_int()
+
+    def adc_ratio_int(self):
+        self.ratio_set(0, 0, 1)
+        self.ratio_set(1, 0, 1)
+        self.ratio_set(2, 0, 1)  
+        self.ratio_set(3, 0, 1) 
+        self.ratio_set(4, 0, 1)
+        self.ratio_set(5, 0, 1)
+        self.ratio_set(6, 0, 1)
+        self.ratio_set(7, 0, 1)
+
+    def ratio_set(self, ch, PULL_UP_RESIST=PULL_UP_RESIST, 
+                  PULL_DOWN_RESIST=PULL_DOWN_RESIST):  
+        regSum = PULL_UP_RESIST + PULL_DOWN_RESIST
+        self.ratio[ch] = self.adc_resol / ((regSum / PULL_DOWN_RESIST) * self.vref)
 
     def read_raw_adc(self, ch):
         config = 0
@@ -66,77 +77,21 @@ class Ads7828:
         elif ch == 7:
             config |= ADS7828_CONFIG_CS_CH7
 
-        time.sleep(0.01)  # adc convertion time waiting
+        # adc convertion time waiting
+        time.sleep(0.01)  
         data = [0, 0]
         data = self.i2c.read_i2c_block_data(self.address, config, 2)
         time.sleep(0.01)
         return (data[0] << 8) + data[1]
-
-    def all_ch_raw_adc_display(self):
-        data = [0] * 8
-        for i in range(8):
-            data[i] = adc.read_raw_adc(i)
-        print(
-            "ch0=%d, ch1=%d, ch2=%d, ch3=%d, ch4=%d, ch5=%d, ch6=%d, ch7=%d"
-            % (data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7])
-        )
-
-
-# ADC CONVERTION CALCULATOR CLASS
-class Voltage_cal(Ads7828):
-    def __init__(
-        self,
-        bus_id=I2C_CHANNEL,
-        address=DEVICE_ADDRESS,
-        debug=False,
-        vref=ADC_REF_VOLT,
-        default_ratio=DEFAULT_RATIO,
-        offset=0,
-    ):
-        Ads7828.__init__(self, bus_id, address, debug)
-        self.adc_resol = ADC_RESOLUTION
-        self.vref = vref
-        self.ratio = [self.adc_resol / (default_ratio * self.vref)] * 8
-        self.offset = [offset] * 8
-        self.temp_offset = [0.0] * 8
-        self.temp_devider = [1.0] * 8
-        self.adc_ratio_int()
-        Ads7828()
-
-    def adc_ratio_int(self):
-        self.temp_ratio(0)  # ADC temperature sensor setting
-        self.ratio_set(1, 0, 1)  # direct input adc(none pull-up & pull-down resist)
-        self.ratio_set(2, 0, 1)  # direct input adc(none pull-up & pull-down resist)
-        self.ratio_set(3, 0, 1)  # direct input adc(none pull-up & pull-down resist)
-        self.ratio_set(7, 0, 1)  # direct input adc(none pull-up & pull-down resist)
-        for i in range(4, 7):
-            self.ratio_set(i)  # adc pull-up & pull-down resist ratio set
-
-    def ratio_set(
-        self, ch, PULL_UP_RESIST=PULL_UP_RESIST, PULL_DOWN_RESIST=PULL_DOWN_RESIST
-    ):  # channel pull-up/pull-down ratio set
-        regSum = PULL_UP_RESIST + PULL_DOWN_RESIST
-        self.ratio[ch] = self.adc_resol / ((regSum / PULL_DOWN_RESIST) * self.vref)
-
-    def temp_ratio(self, ch, v_for_deg=DEGC_FOR_VOLT, zero_for_volt=ZERO_DEG):
-        self.temp_offset[ch] = zero_for_volt / self.vref * self.adc_resol
-        self.temp_devider[ch] = v_for_deg / self.vref * self.adc_resol
-
+    
     def read_voltage(self, ch):
         ch_value = self.read_raw_adc(ch) / self.ratio[ch] - self.offset[ch]
-        return round(ch_value, 2)
-
-    def read_temp(self, ch):
-        ch_value = (self.read_raw_adc(ch) - self.temp_offset[ch]) / self.temp_devider[
-            ch
-        ]
         return round(ch_value, 2)
 
     def all_ch_value_display(self):
         data = [0] * 8
         data[0] = self.read_temp(0)
         for i in range(1, 8):
-            # data that is a voltage values is scaled to a represent a current value
             # an sensibility of 0.185V/A is used because the current is less than 5A
             data[i] = (self.read_voltage(i) - 2.5) / 0.185
 
@@ -150,15 +105,21 @@ class Voltage_cal(Ads7828):
         for x in range(100):
             v = self.read_voltage(0)
             c_sum += v
-            time.sleep(0.01)
+            # time.sleep(0.01)
         return (c_sum/100.0 - 2.5) / 0.185
 
+    def all_ch_raw_adc_display(self):
+        data = [0] * 8
+        for i in range(8):
+            data[i] = self.read_raw_adc(i)
+        print(
+            "ch0=%d, ch1=%d, ch2=%d, ch3=%d, ch4=%d, ch5=%d, ch6=%d, ch7=%d"
+            % (data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7])
+        )
+
+
 if __name__ == "__main__":
-    #    adc = Ads7828()
     bus = smbus.SMBus(1)
-    adc_measu = Voltage_cal(bus,0x48)
+    adc_= ADS7828(bus,0x48)
     while True:
-        #        adc.all_ch_raw_adc_display()
-        #adc_measu.all_ch_value_display()
-        print(adc_measu.rms_channel_0_current())
-        
+        print(adc_.rms_channel_0_current())
