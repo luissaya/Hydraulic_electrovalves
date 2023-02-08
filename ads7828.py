@@ -109,7 +109,7 @@ class ADS7828:
         return (c_sum/100.0 - 2.5) / 0.185
     
     def rms_channel_0_current(self):
-        c_sum = 0
+        c_p2 = 0
         for x in range(100):
             v = self.read_voltage(0)
             c_p2 += v**2
