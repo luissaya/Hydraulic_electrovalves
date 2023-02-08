@@ -1,5 +1,6 @@
 import time
 import smbus
+import math
 
 DEVICE_ADDRESS = 0x48
 I2C_CHANNEL = 1
@@ -99,13 +100,21 @@ class ADS7828:
             % (data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7])
         )
     
-    def rms_channel_0_current(self):
+    def avg_channel_0_current(self):
         c_sum = 0
         for x in range(100):
             v = self.read_voltage(0)
             c_sum += v
             # time.sleep(0.01)
         return (c_sum/100.0 - 2.5) / 0.185
+    
+    def rms_channel_0_current(self):
+        c_sum = 0
+        for x in range(100):
+            v = self.read_voltage(0)
+            c_p2 += v**2
+            # time.sleep(0.01)
+        return (math.sqrt((c_p2/100.0)) - 2.5) / 0.185
 
     def all_ch_raw_adc_display(self):
         data = [0] * 8
@@ -115,7 +124,6 @@ class ADS7828:
             "ch0=%d, ch1=%d, ch2=%d, ch3=%d, ch4=%d, ch5=%d, ch6=%d, ch7=%d"
             % (data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7])
         )
-
 
 if __name__ == "__main__":
     bus = smbus.SMBus(1)
