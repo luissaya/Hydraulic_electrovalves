@@ -1,2 +1,11 @@
+# Files
 Datasheets
 /docs/TEST_HYDRAULIC_ELECTROVALVES.docx
+
+# venv
+/.he
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class

@@ -1,6 +1,8 @@
 import math
 import time
+
 import smbus
+
 
 class PCA9685:
     # Registers/etc.
@@ -82,13 +84,14 @@ class PCA9685:
         pulse = int(percentage * 4095 / 100)
         self.setPWM(channel, 0, pulse)
 
+
 if __name__ == "__main__":
 
     bus = smbus.SMBus(1)
     pwm = PCA9685(bus, 0x40, debug=False)
     pwm.setPWMFreq(50)
-    pwm.setValvePWM(0,50)
-    #while True:
+    pwm.setValvePWM(0, 50)
+    # while True:
     #    for i in range(0, 100, 10):
     #        pwm.setValvePWM(0, i)
     #        time.sleep(0.5)

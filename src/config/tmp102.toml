@@ -1,0 +1,7 @@
+[i2c]
+channel = 1
+address = 0x48
+
+[register]
+temp = 0x00
+config = 0x01
