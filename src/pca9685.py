@@ -89,7 +89,7 @@ if __name__ == "__main__":
 
     bus = smbus.SMBus(1)
     pwm = PCA9685(bus, 0x40, debug=False)
-    pwm.setPWMFreq(50)
+    pwm.setPWMFreq(100)
     pwm.setValvePWM(0, 50)
     # while True:
     #    for i in range(0, 100, 10):
