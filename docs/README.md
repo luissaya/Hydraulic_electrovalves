@@ -33,7 +33,19 @@ Datasheets:
 + [ADS7828](https://media.ncd.io/sites/2/20170721134916/ADS7828-2.pdf?_ga=2.226438362.1942944568.1675366777-1088693194.1675366777)
 
 + [ACS712](https://www.sparkfun.com/datasheets/BreakoutBoards/0712.pdf)
-    
+
+### Measurements
+
+*Valve*
+|  Duty cycle |  Real |  Adc |
+|-------------|-------|------|
+|      0      |   0   | 0.03 |
+|     10      | 0.04  | 0.08 |
+|     20      | 0.2   | 0.13 |
+|     30	  | 0.32  | 0.22 |
+|     40	  | 0.43  | 0.3  |
+|     50	  | 0.54  | 0.39 |
+
 ## XDB103-8
 XDB103-8 Diffused Silicon I2C Output Pressure Sensors – XIDIBEI
 
